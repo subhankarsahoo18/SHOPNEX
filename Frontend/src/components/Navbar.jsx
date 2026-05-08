@@ -286,6 +286,29 @@ export default function Navbar() {
                                 </div>
                             </Link>
 
+                            {/* Profile Button (Authenticated Only) */}
+                            {userId && (
+                                <Link 
+                                    to="/profile" 
+                                    className={`relative group p-2 rounded-xl transition-all duration-300 ${
+                                        isScrolled
+                                            ? "hover:bg-purple-50"
+                                            : "hover:bg-white/20"
+                                    }`}
+                                >
+                                    <div className="relative">
+                                        <UserIcon 
+                                            className={`h-7 w-7 transition-all duration-300 ${
+                                                isScrolled 
+                                                    ? "text-gray-700 group-hover:text-purple-600" 
+                                                    : "text-white group-hover:text-yellow-300"
+                                            }`}
+                                        />
+                                        <div className="absolute inset-0 bg-purple-400 blur-lg opacity-0 group-hover:opacity-30 transition-opacity duration-300 rounded-full"></div>
+                                    </div>
+                                </Link>
+                            )}
+
                             {!userId ? (
                                 <>
                                     {/* Login Button */}
@@ -376,6 +399,22 @@ export default function Navbar() {
                                 </span>
                             )}
                         </Link>
+
+                        {/* Mobile Profile */}
+                        {userId && (
+                            <Link 
+                                to="/profile" 
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className={`flex items-center gap-3 p-3 rounded-xl font-semibold transition-all duration-300 ${
+                                    isScrolled
+                                        ? "bg-purple-50 text-gray-700 hover:bg-purple-100"
+                                        : "bg-white/20 text-white hover:bg-white/30"
+                                }`}
+                            >
+                                <UserIcon className="h-6 w-6" />
+                                <span>My Profile</span>
+                            </Link>
+                        )}
 
                         {!userId ? (
                             <>

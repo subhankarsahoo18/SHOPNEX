@@ -39,7 +39,7 @@ export const placeOrder = async (req, res) => {
         //Clear Cart
         await Cart.findOneAndUpdate({ userId }, { items: [] });
 
-        res.status(201).json({ message: "Order placed successfully", ordeId: order._id });
+        res.status(201).json({ message: "Order placed successfully", orderId: order._id, orderid: order._id, ordeId: order._id });
     } catch (error) {
         res.status(500).json({ message: "Internal server error" });
     }

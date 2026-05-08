@@ -150,7 +150,9 @@ export default function Checkout() {
         userId,
         address: selectedAddress,
       });
-      navigate(`/order-success/${res.data.orderid}`);
+      console.log("Order response:", res.data); // Debugging
+      const finalOrderId = res.data.orderid || res.data.ordeId || res.data.orderId || res.data._id || "error-getting-id";
+      navigate(`/order-success/${finalOrderId}`);
     } catch (error) {
       alert("Failed to place order. Please try again.");
       setIsPlacingOrder(false);

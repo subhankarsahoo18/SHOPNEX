@@ -318,6 +318,8 @@ import { useEffect, useState, useCallback } from "react";
 import api from "../api/axios";
 import { Link, useNavigate } from "react-router";
 import { MagnifyingGlassIcon, FunnelIcon, SparklesIcon, ShoppingCartIcon, BoltIcon } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartOutline } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import Footer from "../components/Footer";
 
 // Custom debounce hook
@@ -342,6 +344,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
+  const [wishlist, setWishlist] = useState([]);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const navigate = useNavigate();
@@ -361,9 +364,40 @@ export default function Home() {
     }
   }, [debouncedSearch, category]);
 
+  const loadWishlist = useCallback(async () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
+    try {
+      const res = await api.get(`/user/profile/${userId}`);
+      setWishlist(res.data.user.wishlist || []);
+    } catch (error) {
+      console.error("Failed to load wishlist:", error);
+    }
+  }, []);
+
   useEffect(() => {
     loadProducts();
-  }, [loadProducts]);
+    loadWishlist();
+  }, [loadProducts, loadWishlist]);
+
+  const toggleWishlist = async (productId) => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      alert("Please log in to add items to your wishlist.");
+      return;
+    }
+    try {
+      const res = await api.post(`/user/wishlist/${userId}`, { productId });
+      setWishlist(res.data.wishlist);
+      
+      const isAdded = res.data.wishlist.some(w => (w._id || w) === productId);
+      setToastMessage(isAdded ? "Added to wishlist ❤️" : "Removed from wishlist 💔");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    } catch (error) {
+      console.error("Failed to toggle wishlist:", error);
+    }
+  };
 
   const addToCart = async (productId) => {
     const userId = localStorage.getItem("userId");
@@ -524,6 +558,23 @@ export default function Home() {
                         className="w-full h-48 object-contain transform group-hover:scale-110 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      
+                      {/* Heart Button */}
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleWishlist(product._id);
+                        }}
+                        className="absolute top-3 right-3 p-2 bg-white/80 backdrop-blur-md rounded-full shadow-md hover:scale-110 transition-transform z-10"
+                        aria-label="Toggle Wishlist"
+                      >
+                        {wishlist.some(w => (w._id || w) === product._id) ? (
+                          <HeartSolid className="h-6 w-6 text-pink-500 animate-bounce-in" />
+                        ) : (
+                          <HeartOutline className="h-6 w-6 text-gray-500 hover:text-pink-500 transition-colors" />
+                        )}
+                      </button>
                     </div>
                     <h2 className="text-lg font-bold text-gray-800 group-hover:text-purple-600 transition-colors duration-300 line-clamp-2 min-h-[56px]">
                       {product.title}
@@ -544,29 +595,23 @@ export default function Home() {
                       </div>
                     </div>
                     
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-3 mt-2">
                       <button
                         onClick={() => addToCart(product._id)}
-                        className="relative bg-gradient-to-r bg-green-600 text-white px-4 py-3 rounded-xl font-semibold transform hover:scale-105 transition-all duration-300 flex-1 overflow-hidden group/btn shadow-lg hover:shadow-xl"
+                        className="w-full flex items-center justify-center gap-2 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-600 hover:text-white px-4 py-2.5 rounded-xl font-bold transition-colors duration-300 shadow-sm"
                         aria-label={`Add ${product.title} to cart`}
                       >
-                        <span className="relative z-10 flex items-center justify-center gap-2">
-                          <ShoppingCartIcon className="h-5 w-5" />
-                          Add
-                        </span>
-                        <div className="absolute inset-0  opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                        <ShoppingCartIcon className="h-5 w-5" />
+                        Add to Cart
                       </button>
                       
                       <button
                         onClick={() => buyNow(product._id)}
-                        className="relative bg-red-500 text-white px-4 py-3 rounded-xl font-semibold transform hover:scale-105 transition-all duration-300 flex-1 overflow-hidden group/btn shadow-lg hover:shadow-xl"
+                        className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-4 py-2.5 rounded-xl font-bold transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                         aria-label={`Buy ${product.title} now`}
                       >
-                        <span className="relative z-10 flex items-center justify-center gap-2">
-                          <BoltIcon className="h-5 w-5" />
-                          Buy
-                        </span>
-                        <div className="absolute inset-0  opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                        <BoltIcon className="h-5 w-5" />
+                        Buy Now
                       </button>
                     </div>
                   </div>

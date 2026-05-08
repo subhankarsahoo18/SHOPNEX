@@ -67,6 +67,8 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import { useParams } from "react-router";
+import { HeartIcon as HeartOutline } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -75,6 +77,7 @@ export default function ProductDetails() {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [wishlist, setWishlist] = useState([]);
   const loadProduct = async () => {
     setLoading(true);
     try {
@@ -89,9 +92,40 @@ export default function ProductDetails() {
     }
   };
 
+  const loadWishlist = async () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
+    try {
+      const res = await api.get(`/user/profile/${userId}`);
+      setWishlist(res.data.user.wishlist || []);
+    } catch (error) {
+      console.error("Failed to load wishlist:", error);
+    }
+  };
+
   useEffect(() => {
     loadProduct();
+    loadWishlist();
   }, []);
+
+  const toggleWishlist = async () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      alert("Please log in to add items to your wishlist.");
+      return;
+    }
+    try {
+      const res = await api.post(`/user/wishlist/${userId}`, { productId: product._id });
+      setWishlist(res.data.wishlist);
+      
+      const isAdded = res.data.wishlist.some(w => (w._id || w) === product._id);
+      setToastMessage(isAdded ? "Added to wishlist ❤️" : "Removed from wishlist 💔");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    } catch (error) {
+      console.error("Failed to toggle wishlist:", error);
+    }
+  };
 
   const addToCart = async () => {
     const userId = localStorage.getItem("userId");
@@ -173,12 +207,30 @@ export default function ProductDetails() {
             ₹{product.price}
           </p>
 
-          <button
-            onClick={addToCart}
-            className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 animate-fadeIn delay-800 animate-bounce-on-hover"
-          >
-            🛒 Add to Cart
-          </button>
+          <div className="flex flex-col md:flex-row gap-4 justify-center md:justify-start">
+            <button
+              onClick={addToCart}
+              className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 animate-fadeIn delay-800 animate-bounce-on-hover"
+            >
+              🛒 Add to Cart
+            </button>
+            <button
+              onClick={toggleWishlist}
+              className="w-full md:w-auto bg-white border-2 border-purple-200 hover:border-purple-600 text-purple-600 font-semibold py-4 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 animate-fadeIn delay-800 flex items-center justify-center gap-2"
+            >
+              {wishlist.some(w => (w._id || w) === product._id) ? (
+                <>
+                  <HeartSolid className="h-6 w-6 text-pink-500 animate-bounce-in" />
+                  Wishlisted
+                </>
+              ) : (
+                <>
+                  <HeartOutline className="h-6 w-6" />
+                  Add to Wishlist
+                </>
+              )}
+            </button>
+          </div>
           {showToast && (
         <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 animate-slide-up-bounce">
           <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border-2 border-white/20">

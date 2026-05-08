@@ -1,6 +1,6 @@
 import axios from 'axios'
 const api=axios.create({
-baseURL:"https://shopnex-gb3i.onrender.com/api"
+    baseURL:"http://localhost:5001/api"
 })
 
 export default api;

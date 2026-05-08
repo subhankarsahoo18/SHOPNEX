@@ -80,7 +80,8 @@ import Navbar from './components/Navbar';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import CheckoutAddress from './pages/CheckoutAddress';
-import OrderSuccess from './pages/OrderSucess'; //  Fixed typo: OrderSucess -> OrderSuccess
+import OrderSuccess from './pages/OrderSucess'; 
+import Profile from './pages/Profile';
 
 
 function Layout() {
@@ -107,6 +108,7 @@ const router = createBrowserRouter([
       { path: "/checkout", element: <Checkout /> },
       { path: "/checkout-address", element: <CheckoutAddress /> },
       { path: "/order-success/:id", element: <OrderSuccess /> },
+      { path: "/profile", element: <Profile /> },
     ],
   },
 ]);
