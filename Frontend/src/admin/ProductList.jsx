@@ -1,4 +1,4 @@
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../api/axios";
 import { Link } from "react-router";
 import { PencilSquareIcon, TrashIcon, PlusIcon, PhotoIcon } from "@heroicons/react/24/outline";
@@ -12,11 +12,11 @@ export default function ProductList() {
     }
 
     const deletedProduct = async (id) => {
-        try{
+        try {
             await api.delete(`/products/delete/${id}`);
             alert("Product deleted successfully!");
             loadProducts();
-        }catch(err){
+        } catch (err) {
             console.error("Error deleting product:", err);
         }
     }
@@ -25,7 +25,7 @@ export default function ProductList() {
         loadProducts();
     }, []);
 
-    return(
+    return (
         <div className="max-w-6xl mx-auto mt-10 px-4 md:px-6 mb-12">
             <div className="flex justify-between items-center mb-8">
                 <h2 className="text-3xl font-bold text-gray-800">Product List</h2>
@@ -56,7 +56,7 @@ export default function ProductList() {
                                     </div>
                                 )}
                             </div>
-                            
+
                             {/* Card Content Area */}
                             <div className="p-5 flex flex-col justify-between flex-grow">
                                 <div>
@@ -64,7 +64,7 @@ export default function ProductList() {
                                     <div className="flex flex-col gap-2 mt-2">
                                         <div className="flex items-center justify-between">
                                             <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Price</span>
-                                            <span className="font-bold text-lg text-blue-600">${product.price}</span>
+                                            <span className="font-bold text-lg text-blue-600">₹{product.price}</span>
                                         </div>
                                         <div className="flex items-center justify-between">
                                             <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</span>
@@ -79,7 +79,7 @@ export default function ProductList() {
                                         <PencilSquareIcon className="w-4 h-4 stroke-2" />
                                         Edit
                                     </Link>
-                                    <button 
+                                    <button
                                         onClick={() => deletedProduct(product._id)}
                                         className="flex-1 flex justify-center items-center gap-1.5 text-red-600 hover:text-red-800 font-medium px-3 py-2 rounded-lg hover:bg-red-50 transition-colors focus:ring-2 focus:ring-red-200 outline-none"
                                     >
